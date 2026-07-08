@@ -244,7 +244,7 @@ function exportCSV() {
 document.addEventListener('DOMContentLoaded', function() {
     loadInterfaces();
     refreshDashboard();
-    setInterval(refreshDashboard, 5000);
+    setInterval(refreshDashboard, 50000);
 
     // Attack
     document.getElementById('startAttackBtn').addEventListener('click', function() {
