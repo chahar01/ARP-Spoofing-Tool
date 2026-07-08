@@ -1,0 +1,6 @@
+Flask==2.3.3
+scapy>=2.4.5
+waitress==2.1.2
+ifaddr==0.2.0
+Werkzeug==2.3.7
+psutil==5.9.5

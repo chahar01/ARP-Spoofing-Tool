@@ -1,0 +1,6 @@
+body { background-color: #f8f9fa; }
+.card { box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075); }
+#status-bar .badge { margin-left: 10px; font-size: 1rem; }
+#eventTable tbody tr { font-size: 0.9rem; }
+#scanResults { font-size: 0.85rem; }
+#networkGraph { background: #f0f2f5; border-radius: 4px; }

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARP Spoofing Attack & Detection Tool</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1">ARP Spoofing Attack & Detection Tool</span>
+            <span class="navbar-text" id="status-bar">
+                <span class="badge bg-secondary" id="monitor-status">Monitor: Stopped</span>
+                <span class="badge bg-secondary" id="attack-status">Attack: Stopped</span>
+                <button id="envCheckBtn" class="btn btn-outline-light btn-sm ms-3">Check Environment</button>
+            </span>
+        </div>
+    </nav>
+
+    <div id="setupAlertContainer" class="container mt-3" style="display:none;">
+        <div id="setupAlert" class="alert alert-warning" role="alert"></div>
+    </div>
+
+    <div class="container mt-4">
+        <!-- Statistics Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-2">
+                <div class="card text-white bg-primary">
+                    <div class="card-body">
+                        <h6 class="card-title">Total Events</h6>
+                        <h2 id="stat-total">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card text-white bg-danger">
+                    <div class="card-body">
+                        <h6 class="card-title">Critical Alerts</h6>
+                        <h2 id="stat-critical">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card text-white bg-warning">
+                    <div class="card-body">
+                        <h6 class="card-title">Warnings</h6>
+                        <h2 id="stat-warning">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card text-white bg-info">
+                    <div class="card-body">
+                        <h6 class="card-title">Info Events</h6>
+                        <h2 id="stat-info">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card text-white bg-success">
+                    <div class="card-body">
+                        <h6 class="card-title">Attacks Started</h6>
+                        <h2 id="stat-attacks">0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">Attack Controls</div>
+                    <div class="card-body">
+                        <div class="mb-2">
+                            <label class="form-label">Network Interface</label>
+                            <select class="form-select" id="interfaceAttack">
+                                <option value="">-- Select --</option>
+                            </select>
+                            <small class="text-muted">Or type manually below</small>
+                            <input type="text" class="form-control mt-1" id="manualInterfaceAttack" placeholder="e.g., Ethernet0 or \Device\NPF_{...}">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Target IP</label>
+                            <input type="text" class="form-control" id="targetIP" placeholder="e.g., 192.168.1.10">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Gateway IP</label>
+                            <input type="text" class="form-control" id="gatewayIP" placeholder="e.g., 192.168.1.1">
+                        </div>
+                        <button class="btn btn-danger" id="startAttackBtn">Start Attack</button>
+                        <button class="btn btn-success" id="stopAttackBtn">Stop Attack</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">Monitor Controls</div>
+                    <div class="card-body">
+                        <div class="mb-2">
+                            <label class="form-label">Network Interface</label>
+                            <select class="form-select" id="interfaceMonitor">
+                                <option value="">-- Select --</option>
+                            </select>
+                            <small class="text-muted">Or type manually below</small>
+                            <input type="text" class="form-control mt-1" id="manualInterfaceMonitor" placeholder="e.g., Ethernet0 or \Device\NPF_{...}">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Gateway IP (optional, for protection)</label>
+                            <input type="text" class="form-control" id="monitorGatewayIP" placeholder="e.g., 192.168.1.1">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Gateway MAC (optional)</label>
+                            <input type="text" class="form-control" id="monitorGatewayMAC" placeholder="e.g., aa:bb:cc:dd:ee:ff">
+                        </div>
+                        <button class="btn btn-primary" id="startMonitorBtn">Start Monitor</button>
+                        <button class="btn btn-warning" id="stopMonitorBtn">Stop Monitor</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">Tools</div>
+                    <div class="card-body">
+                        <button class="btn btn-secondary" id="scanBtn">Scan Network</button>
+                        <button class="btn btn-info" id="runTestBtn">Run Test</button>
+                        <button class="btn btn-outline-danger" id="clearEventsBtn">Clear Events</button>
+                        <button class="btn btn-success" id="exportCSVBtn">Export CSV</button>
+                        <hr>
+                        <div id="scanResults" style="max-height:150px; overflow-y:auto; font-size:0.9rem;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Topology -->
+        <div class="row mt-4">
+            <div class="col">
+                <div class="card">
+                    <div class="card-header">Network Topology</div>
+                    <div class="card-body">
+                        <div id="networkGraph" style="height: 300px; border: 1px solid #ddd;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Events by Type</div>
+                    <div class="card-body">
+                        <canvas id="typeChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">Events by Severity</div>
+                    <div class="card-body">
+                        <canvas id="severityChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Event Log -->
+        <div class="row mt-4">
+            <div class="col">
+                <div class="card">
+                    <div class="card-header">
+                        <span>Event Log</span>
+                        <div class="float-end">
+                            <input type="text" id="searchInput" placeholder="Search..." class="form-control form-control-sm d-inline-block w-auto">
+                            <select id="typeFilter" class="form-select form-select-sm d-inline-block w-auto">
+                                <option value="">All Types</option>
+                                <option value="attack_start">Attack Start</option>
+                                <option value="attack_stop">Attack Stop</option>
+                                <option value="detection_alert">Detection Alert</option>
+                                <option value="monitor_start">Monitor Start</option>
+                                <option value="monitor_stop">Monitor Stop</option>
+                                <option value="test_scenario">Test Scenario</option>
+                            </select>
+                            <select id="severityFilter" class="form-select form-select-sm d-inline-block w-auto">
+                                <option value="">All Severities</option>
+                                <option value="info">Info</option>
+                                <option value="warning">Warning</option>
+                                <option value="critical">Critical</option>
+                            </select>
+                            <button class="btn btn-sm btn-primary" id="refreshBtn">Refresh</button>
+                        </div>
+                    </div>
+                    <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-striped table-hover" id="eventTable">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Type</th>
+                                    <th>Source IP</th>
+                                    <th>Target IP</th>
+                                    <th>Source MAC</th>
+                                    <th>Target MAC</th>
+                                    <th>Details</th>
+                                    <th>Severity</th>
+                                </tr>
+                            </thead>
+                            <tbody id="eventBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Educational -->
+        <div class="row mt-4 mb-5">
+            <div class="col">
+                <div class="card">
+                    <div class="card-header">About & Protection Methods</div>
+                    <div class="card-body">
+                        <h5>ARP Protocol (RFC 826)</h5>
+                        <p>Address Resolution Protocol maps IP addresses to MAC addresses. ARP requests are broadcast; replies can be spoofed.</p>
+                        <h5>How ARP Spoofing Works</h5>
+                        <p>An attacker sends forged ARP replies, associating their MAC with the gateway's IP. Victims send traffic to the attacker, who can intercept, modify, or drop it.</p>
+                        <h5>Detection Techniques</h5>
+                        <ul>
+                            <li>MAC address changes for an IP</li>
+                            <li>Unsolicited ARP replies</li>
+                            <li>Excessive ARP traffic</li>
+                            <li>Duplicate IP addresses</li>
+                        </ul>
+                        <h5>Protection / Mitigation</h5>
+                        <ul>
+                            <li><strong>Static ARP entries</strong> – manually set, but not scalable.</li>
+                            <li><strong>DHCP Snooping</strong> – switches track DHCP assignments.</li>
+                            <li><strong>Dynamic ARP Inspection (DAI)</strong> – switches validate ARP packets against a trusted database (DHCP snooping). Blocks invalid ARP replies.</li>
+                            <li><strong>Port Security</strong> – limits MAC addresses per port.</li>
+                            <li><strong>802.1X</strong> – network access control.</li>
+                        </ul>
+                        <p><strong>DAI is the most effective defense</strong> because it prevents forged ARP packets from being forwarded, stopping the attack at the switch level.</p>
+                        <p><em>References: RFC 826, SANS Network Forensics Papers, IEEE 802.1X</em></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>
