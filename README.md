@@ -485,11 +485,9 @@ MCA (Hons.) Cyber Security
 
 Lovely Professional University
 
-GitHub: https://github.com/YOUR_USERNAME
+GitHub: https://github.com/chahar01
 
-LinkedIn: https://linkedin.com/in/YOUR_PROFILE
-
-Email: your-email@example.com
+Email: rahulsingh25chahar@gmail.com
 
 ---
 
